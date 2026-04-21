@@ -1,0 +1,101 @@
+name: CI - Lint, Security, and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install Project & Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # -e ensures coverage tracks the actual source files
+        pip install -e ".[dev]" pytest-cov bandit[toml] pip-audit
+
+    - name: 🛡️ Security Audit (pip-audit)
+      continue-on-error: true
+      run: pip-audit --format markdown --output pip-audit-report.md
+
+    - name: 🔍 Security Scan (Bandit)
+      continue-on-error: true
+      run: bandit -c pyproject.toml -r . -ll -i -f xml -o bandit-results.xml
+
+    - name: 🎨 Lint & Format (Ruff)
+      continue-on-error: true
+      run: |
+        ruff check . --output-format=github
+        ruff format --check .
+
+    - name: 🧩 Type Check (Mypy)
+      continue-on-error: true
+      run: mypy .
+
+    - name: 🧪 Run Tests & Coverage (Pytest)
+      env:
+        TEST_CREDENTIAL: ${{ secrets.TEST_CREDENTIAL }}
+        PYTHONPATH: .
+      run: |
+        # Configuration is pulled from pyproject.toml
+        pytest --junitxml=junit.xml
+
+    - name: 📊 Upload All Reports as Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ci-reports-and-coverage
+        path: |
+          pip-audit-report.md
+          bandit-results.xml
+          junit.xml
+          coverage.xml
+          htmlcov/
+
+    - name: 🏁 Publish GitHub Test Summary
+      if: always()
+      uses: mikepenz/action-junit-report@v4
+      with:
+        report_paths: "**/junit.xml"
+        check_name: "Pytest Results"
+
+    - name: 📝 Write Job Summary
+      if: always()
+      run: |
+        echo "### Pipeline Complete 🚀" >> $GITHUB_STEP_SUMMARY
+        echo "Check the **Artifacts** tab for the deep-dive HTML coverage report." >> $GITHUB_STEP_SUMMARY
+
+    - name: ☂️ Upload Coverage to Codecov
+      if: always()
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true

@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project] # CHANGE THIS FOR YOUR PROJECT
+name = "python-template"
+version = "0.1.0"
+description = "Template project for Python development"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["colorlog", "GitPython", "python-dotenv", "pyzipper"]
+
+[project.optional-dependencies]
+dev = ["bandit[toml]", "pip-audit", "pytest", "pytest-cov", "ruff", "mypy", "invoke"]
+sphinx = [
+    "sphinx",
+    "pydata-sphinx-theme",
+    "myst-parser",
+    "sphinx-copybutton",
+    "nbsphinx",
+]
+
+[project.scripts]
+build-docs = "sphinx.cmd.build:main"
+
+[project.urls]
+Repository = "https://github.com/Unloosed/python-template" # CHANGE THIS FOR YOUR PROJECT
+
+[tool.setuptools]
+packages = ["utils"]
+
+[tool.coverage.run]
+omit = [
+    "tests/*",        # Ignore everything in the tests folder
+    "**/__init__.py", # Usually good to ignore empty init files
+    ".venv/*",        # CRITICAL: Prevents measuring library code
+    "setup.py",
+    "tasks.py",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "--strict-markers --cov=. --cov-report=xml --cov-report=term-missing"
+
+[tool.ruff]
+# Target version for syntax
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+# E/W = pycodestyle (Flake8)
+# F = Pyflakes (Flake8)
+# I = isort
+# B = flake8-bugbear (common enterprise additions)
+select = ["E", "W", "F", "I", "B", "C90"]
+ignore = ["E501"]                         # Ignore line length errors (let the formatter handle it)
+
+[tool.ruff.format]
+# Mimic Black's style
+quote-style = "double"
+indent-style = "space"
+
+[tool.bandit]
+exclude_dirs = [
+    "*/.conda/*",
+    "*/.venv/*",
+    "*/.vscode/*",
+    "*/build/*",
+    "tests",
+]
+
+[tool.mypy]
+python_version = "3.12"
+explicit_package_bases = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "pyzipper.*",
+    "git.*",
+    "dotenv.*",
+    "colorlog.*",
+]
+ignore_missing_imports = true

@@ -1,0 +1,9 @@
+fixes:
+  - "/home/runner/work/python-template/python-template/::"
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
