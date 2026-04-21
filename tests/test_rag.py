@@ -1,7 +1,7 @@
 import os
 from unittest.mock import MagicMock, patch
 import pytest
-from rag import add_document, search_docs, answer_question, get_stats
+from rag import add_document, search_docs, answer_question, get_stats, OpenAIEmbeddingFunction
 
 @pytest.fixture
 def mock_chroma():
@@ -61,6 +61,21 @@ def test_answer_question_strict_no_results(mock_openai, mock_chroma):
     assert "couldn't find enough relevant information" in answer
     assert len(retrieved) == 0
 
+def test_answer_question_confidence_filter(mock_openai, mock_chroma):
+    mock_chroma.query.return_value = {
+        "documents": [["doc1", "doc2"]],
+        "metadatas": [[{"source": "s1", "chunk_index": 0}, {"source": "s2", "chunk_index": 0}]],
+        "distances": [[0.1, 0.9]]
+    }
+    mock_response = MagicMock()
+    mock_response.choices[0].message.content = "Ans"
+    mock_openai.chat.completions.create.return_value = mock_response
+
+    # Distance 0.9 should be filtered out if min_confidence is 0.5 (threshold 1-0.5 = 0.5)
+    _, retrieved = answer_question("query", min_confidence=0.5)
+    assert len(retrieved) == 1
+    assert retrieved[0][0] == "doc1"
+
 def test_log_feedback(tmp_path):
     feedback_file = tmp_path / "feedback.csv"
     from rag import log_feedback
@@ -76,3 +91,10 @@ def test_get_stats(mock_chroma):
     stats = get_stats()
     assert stats["total_chunks"] == 10
     assert stats["unique_documents"] == 2
+
+def test_openai_embedding_function(mock_openai):
+    mock_openai.embeddings.create.return_value.data = [MagicMock(embedding=[0.1, 0.2])]
+    eb = OpenAIEmbeddingFunction()
+    res = eb(["test"])
+    assert len(res) == 1
+    assert list(res[0]) == [0.1, 0.2]
