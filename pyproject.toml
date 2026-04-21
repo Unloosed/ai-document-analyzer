@@ -9,15 +9,15 @@ description = "AI Document Analyzer that takes a document and returns a summary 
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "chromadb",
     "colorlog",
     "GitPython",
-    "python-dotenv==1.0.1",
+    "openai",
+    "pypdf",
+    "python-dotenv",
     "pyzipper",
-    "streamlit==1.45.0",
-    "chromadb==0.5.23",
-    "pypdf==5.4.0",
-    "openai==1.76.0",
-    "tiktoken==0.9.0",
+    "streamlit",
+    "tiktoken",
 ]
 
 [project.optional-dependencies]

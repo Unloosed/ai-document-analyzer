@@ -1,4 +1,5 @@
 import streamlit as st
+
 from rag import add_document, answer_question, get_stats, log_feedback
 from utils.document_processing import (
     chunk_text,
@@ -22,9 +23,7 @@ if "last_query" not in st.session_state:
 with st.sidebar:
     st.header("Upload & Index")
     uploaded_files = st.file_uploader(
-        "Upload documents",
-        type=["pdf", "txt", "md"],
-        accept_multiple_files=True
+        "Upload documents", type=["pdf", "txt", "md"], accept_multiple_files=True
     )
 
     chunk_size = st.slider("Chunk Size", 200, 2000, 800)
@@ -58,7 +57,9 @@ with st.sidebar:
 
     st.divider()
     st.header("Settings")
-    strict_mode = st.toggle("Strict Mode", value=True, help="Only answer if evidence is found in context.")
+    strict_mode = st.toggle(
+        "Strict Mode", value=True, help="Only answer if evidence is found in context."
+    )
     min_confidence = st.slider("Min Confidence (Similarity)", 0.0, 1.0, 0.0)
 
     st.divider()
@@ -87,7 +88,9 @@ if st.button("Get Answer"):
         if retrieved:
             st.markdown("### Retrieved Context")
             for i, (doc, meta, score) in enumerate(retrieved, start=1):
-                with st.expander(f"{i}. {meta['source']} — chunk {meta['chunk_index']} (Distance: {score:.4f})"):
+                with st.expander(
+                    f"{i}. {meta['source']} — chunk {meta['chunk_index']} (Distance: {score:.4f})"
+                ):
                     st.write(doc)
         elif strict_mode:
             st.info("No relevant context found in strict mode.")
@@ -98,9 +101,13 @@ if st.session_state.last_answer:
     col1, col2 = st.columns([1, 10])
     with col1:
         if st.button("👍"):
-            log_feedback(st.session_state.last_query, st.session_state.last_answer, "thumbs_up")
+            log_feedback(
+                st.session_state.last_query, st.session_state.last_answer, "thumbs_up"
+            )
             st.toast("Feedback recorded!")
     with col2:
         if st.button("👎"):
-            log_feedback(st.session_state.last_query, st.session_state.last_answer, "thumbs_down")
+            log_feedback(
+                st.session_state.last_query, st.session_state.last_answer, "thumbs_down"
+            )
             st.toast("Feedback recorded!")

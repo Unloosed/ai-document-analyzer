@@ -13,23 +13,47 @@ from utils.file_ops import get_env_variable
 
 logger = logging.getLogger(__name__)
 
-# Load environment variables using the provided utility
 try:
-    OPENAI_API_KEY = get_env_variable("OPENAI_API_KEY", required=True)
-    EMBEDDING_MODEL = get_env_variable("EMBEDDING_MODEL", default="text-embedding-3-small")
-    CHAT_MODEL = get_env_variable("CHAT_MODEL", default="gpt-4o-mini")
+    OPENROUTER_API_KEY = get_env_variable("OPENROUTER_API_KEY", required=True)
+    OPENROUTER_BASE_URL = get_env_variable(
+        "OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1"
+    )
+    EMBEDDING_MODEL = get_env_variable(
+        "EMBEDDING_MODEL", default="nomic-embed-text-v1.5"
+    )
+    CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free")
 except Exception as e:
     logger.warning("Environment variables not fully set: %s", e)
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "missing")
-    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
-    CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
+    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "missing")
+    OPENROUTER_BASE_URL = os.getenv(
+        "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
+    )
+    EMBEDDING_MODEL = get_env_variable(
+        "EMBEDDING_MODEL", default="nomic-embed-text-v1.5"
+    )
+    CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url=OPENROUTER_BASE_URL,
+    default_headers={
+        "HTTP-Referer": "http://localhost:8501",
+        "X-Title": "ai-document-analyzer",
+    },
+)
 
 
 class OpenAIEmbeddingFunction(EmbeddingFunction):
-    def __call__(self, input: List[str]) -> Embeddings:
-        response = client.embeddings.create(model=EMBEDDING_MODEL, input=input)
+    def __call__(self, input=None, texts=None) -> Embeddings:
+        if input is None and texts is not None:
+            input = texts
+        elif input is None:
+            raise ValueError("No input provided to embedding function")
+
+        response = client.embeddings.create(
+            model=EMBEDDING_MODEL,
+            input=input,
+        )
         return [item.embedding for item in response.data]
 
 
@@ -111,7 +135,10 @@ def answer_question(
         retrieved = [r for r in retrieved if r[2] <= (1.0 - min_confidence)]
 
     if not retrieved and strict_mode:
-        return "I couldn't find enough relevant information to answer your question.", []
+        return (
+            "I couldn't find enough relevant information to answer your question.",
+            [],
+        )
 
     context_parts = []
     for doc, meta, _ in retrieved:

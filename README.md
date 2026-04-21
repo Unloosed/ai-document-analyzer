@@ -1,4 +1,4 @@
-# General Python Programming
+# AI Document Analyzer
 
 | | |
 | --- | --- |
@@ -9,81 +9,59 @@
 
 ---
 
-A modern Python project template with utility functions for file operations, logging, and environment management.
+A Streamlit-based RAG (Retrieval-Augmented Generation) assistant that answers questions over uploaded PDF, TXT, and MD documents using embedding search and grounded generation.
 
 ## Features
 
-- **Logging Setup**: Standardized logging with console colors and file rotation.
-- **File Operations**: Utilities for directory management, environment variable loading, and Git integration.
-- **Modern Plumbing**: Uses `pyproject.toml` for dependency management and project configuration.
-- **CI/CD Ready**: Includes configurations for GitHub Actions (linting, testing, type-checking, and security checks).
-- **Static Analysis**: Configured with `ruff`, `mypy`, and `bandit` for high code quality and security.
-- **Pre-commit Hooks**: Automatic quality checks before every commit.
-- **Standardized Dev Environment**: `Makefile` for common tasks and VS Code Dev Container for an instant setup.
-- **Automated Documentation**: Utilizes `Sphinx` and GitHub Actions for generation and publication of documentation.
-
-## Template Setup
-
-To use this project as a template, please follow these steps:
-
-1. **Update `pyproject.toml`**:
-    - Modify the `[project]` section, including `name`, `version`, `description`, and `dependencies`.
-    - Update the `[project.urls]` section with your repository URL.
-2. **Configure CI/CD**:
-    - **GitHub Actions**: Ensure the `.github/workflows/ci.yml` file is configured correctly for your branch names and environments.
-    - **Codecov**:
-        - Create a [Codecov](https://codecov.io/) account and link it to your repository.
-        - Retrieve your `CODECOV_TOKEN` from the Codecov repository settings.
-        - Add the token as a repository secret in GitHub: `Settings > Secrets and variables > Actions > New repository secret`.
-        - Modify the badge in `README.md` by getting a token from Codecov's `Config > Badges & Graphs`
-3. **Update `Sphinx` documentation**:
-    - Update the `copyright`, `author`, and `release` variables in `source/conf.py`.
-    - Update the project name at the top of `source/index.rst`
-4. **Update `README.md`**:
-    - Replace the badges at the top with your own (testing, code quality, etc.).
-    - Adjust the project description and usage examples to match your specific application.
-5. **Manage Dependencies**:
-    - Add project-specific dependencies to the `dependencies` list in `pyproject.toml`.
-    - If additional dev tools are needed, add them to `[project.optional-dependencies]`.
-6. **Add credentials**:
-    - Create a `.env` file in the project root and store credentials in there if not using key vaults like Azure
-7. **Enable GitHub Pages**:
-    - Navigate to *Settings > Pages* and change the `Source` to `GitHub Actions`
+- **Multi-format Support**: Upload and index PDFs, Text files, and Markdown files.
+- **RAG Architecture**: Uses OpenAI embeddings and ChromaDB for semantic retrieval.
+- **Duplicate Detection**: Content-based hashing to prevent redundant document indexing.
+- **Grounded Answers**: Provides citations (source and chunk) to reduce hallucinations.
+- **Configurable Search**: Adjust chunk sizes, overlap, and similarity confidence via the UI.
+- **Feedback Loop**: Log user feedback (thumbs up/down) for answer quality tracking.
+- **Admin Dashboard**: Real-time statistics on indexed documents and chunks.
 
 ## Installation
 
-To install the project in editable mode with development dependencies:
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/Unloosed/ai-document-analyzer.git
+   cd ai-document-analyzer
+   ```
+
+2. **Set up a virtual environment**:
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies**:
+
+   ```bash
+   pip install -e .
+   ```
+
+## Configuration
+
+Create a `.env` file in the root directory with your credentials:
+
+```text
+OPENAI_API_KEY=your_openai_api_key_here
+EMBEDDING_MODEL=text-embedding-3-small
+CHAT_MODEL=gpt-4o-mini
+```
+
+## Running the App
+
+Start the Streamlit application:
 
 ```bash
-# Using pip
-pip install -e ".[dev,sphinx]"
-
-# Or using the tasks.py invocation
-python -m invoke --list
+streamlit run app.py
 ```
 
-## Usage
-
-### Logging
-
-```python
-import logging
-from utils.logger_setup import setup_universal_logging
-
-setup_universal_logging(default_level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-logger.info("Universal logging is ready!")
-```
-
-### Environment Variables
-
-```python
-from utils.file_ops import get_env_variable
-
-# Loads from .env if present
-db_url = get_env_variable("DATABASE_URL", required=True)
-```
+The app will be available at `http://localhost:8501`.
 
 ## Development
 
