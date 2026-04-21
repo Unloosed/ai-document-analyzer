@@ -19,19 +19,23 @@ try:
         "OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1"
     )
     EMBEDDING_MODEL = get_env_variable(
-        "EMBEDDING_MODEL", default="nomic-embed-text-v1.5"
+        "EMBEDDING_MODEL", default="openai/text-embedding-3-small"
     )
     CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free")
 except Exception as e:
     logger.warning("Environment variables not fully set: %s", e)
-    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "missing")
-    OPENROUTER_BASE_URL = os.getenv(
-        "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
+    OPENROUTER_API_KEY = get_env_variable("OPENROUTER_API_KEY", default="missing")
+    OPENROUTER_BASE_URL = get_env_variable(
+        "OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1"
     )
     EMBEDDING_MODEL = get_env_variable(
-        "EMBEDDING_MODEL", default="nomic-embed-text-v1.5"
+        "EMBEDDING_MODEL", default="openai/text-embedding-3-small"
     )
     CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free")
+
+logger.warning("OPENROUTER_BASE_URL=%s", OPENROUTER_BASE_URL)
+logger.warning("EMBEDDING_MODEL=%s", EMBEDDING_MODEL)
+logger.warning("CHAT_MODEL=%s", CHAT_MODEL)
 
 client = OpenAI(
     api_key=OPENROUTER_API_KEY,
@@ -50,10 +54,16 @@ class OpenAIEmbeddingFunction(EmbeddingFunction):
         elif input is None:
             raise ValueError("No input provided to embedding function")
 
-        response = client.embeddings.create(
-            model=EMBEDDING_MODEL,
-            input=input,
-        )
+        try:
+            response = client.embeddings.create(
+                model=EMBEDDING_MODEL,
+                input=input,
+            )
+        except Exception as e:
+            logger.error(
+                "Embedding request failed for model '%s': %s", EMBEDDING_MODEL, e
+            )
+            raise
         return [item.embedding for item in response.data]
 
 
