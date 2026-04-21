@@ -26,3 +26,15 @@ def test_get_file_hash():
 
     assert hash1 == hash2
     assert hash1 != hash3
+
+def test_read_txt_file_path(tmp_path):
+    d = tmp_path / "subdir"
+    d.mkdir()
+    p = d / "hello.txt"
+    p.write_text("content")
+    assert read_txt(str(p)) == "content"
+
+def test_chunk_text_overlap_greater_than_size():
+    text = "some text"
+    chunks = chunk_text(text, chunk_size=5, overlap=10)
+    assert len(chunks) > 0
