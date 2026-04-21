@@ -2,10 +2,10 @@
 
 | | |
 | --- | --- |
-| **Testing** | [![CI Status](https://github.com/Unloosed/python-template/actions/workflows/ci.yml/badge.svg)](https://github.com/Unloosed/python-template/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Unloosed/python-template/graph/badge.svg?token=JR4BSEK1JK)](https://codecov.io/gh/Unloosed/python-template) |
+| **Testing** | [![CI Status](https://github.com/Unloosed/ai-document-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/Unloosed/ai-document-analyzer/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Unloosed/ai-document-analyzer/graph/badge.svg?token=VXecHu2XBp)](https://codecov.io/gh/Unloosed/ai-document-analyzer) |
 | **Code Quality** | [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) [![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit) |
 | **Meta** | [![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) |
-| **Docs** | [![Documentation Status](https://github.com/Unloosed/python-template/actions/workflows/deploy-docs.yml/badge.svg)](https://Unloosed.github.io/python-template/) |
+| **Docs** | [![Documentation Status](https://github.com/Unloosed/ai-document-analyzer/actions/workflows/deploy-docs.yml/badge.svg)](https://Unloosed.github.io/ai-document-analyzer/) |
 
 ---
 

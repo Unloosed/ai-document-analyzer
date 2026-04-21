@@ -12,7 +12,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
-WORKDIR /workspaces/python-template
+WORKDIR /workspaces/ai-document-analyzer
 
 # Copy project files into the container (optional, devcontainers usually mount)
 # COPY . .

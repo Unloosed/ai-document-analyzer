@@ -1,4 +1,4 @@
-# Contributing to python-template
+# Contributing to ai-document-analyzer
 
 First off, thanks for taking the time to contribute! 🎉
 
@@ -22,7 +22,7 @@ If you have an idea for a feature or an enhancement, feel free to open an issue.
 ### Your First Code Contribution
 
 1. Fork the repository.
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/python-template.git`.
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/ai-document-analyzer.git`.
 3. Create a branch for your work: `git checkout -b my-new-feature`.
 4. Install the development environment: `make dev-install`.
 5. Make your changes.
