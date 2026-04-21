@@ -196,6 +196,7 @@ pip-audit-report.md
 
 # Other generated files
 data/
+*.sqlite3
 feedback.csv
 *.zip
 *.parquet
