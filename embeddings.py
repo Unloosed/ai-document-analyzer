@@ -1,10 +1,10 @@
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 from chromadb.api.types import EmbeddingFunction, Embeddings
-from openai import OpenAI, APIError, APIConnectionError, AuthenticationError
+from openai import APIConnectionError, APIError, AuthenticationError, OpenAI
 
-from config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, EMBEDDING_MODEL
+from config import EMBEDDING_MODEL, OPENROUTER_API_KEY, OPENROUTER_BASE_URL
 
 logger = logging.getLogger(__name__)
 

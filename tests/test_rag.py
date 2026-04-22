@@ -1,10 +1,12 @@
-import os
 from unittest.mock import MagicMock, patch
+
 import pytest
-from store import add_document, search_docs, get_stats
-from rag import answer_question
+
 from embeddings import OpenAIEmbeddingFunction
 from feedback import log_feedback
+from rag import answer_question
+from store import add_document, get_stats, search_docs
+
 
 @pytest.fixture
 def mock_chroma():

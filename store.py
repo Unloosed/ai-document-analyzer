@@ -5,6 +5,7 @@ import uuid
 from typing import Any, Dict, List, Tuple
 
 import chromadb
+
 from embeddings import OpenAIEmbeddingFunction
 
 logger = logging.getLogger(__name__)
@@ -90,7 +91,7 @@ def search_docs(query: str, k: int = 5) -> List[Tuple[str, Dict[str, Any], float
     metas = results["metadatas"][0]
     distances = results["distances"][0] if results["distances"] else [0.0] * len(docs)
 
-    return list(zip(docs, metas, distances))
+    return list(zip(docs, metas, distances, strict=False))
 
 def get_stats() -> Dict[str, Any]:
     """Returns basic statistics about the vector store.

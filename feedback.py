@@ -2,6 +2,7 @@ import csv
 import os
 from datetime import datetime, timezone
 
+
 def log_feedback(
     question: str, answer: str, feedback: str, path: str = "feedback.csv"
 ) -> None:

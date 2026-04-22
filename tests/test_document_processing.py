@@ -1,6 +1,14 @@
 import io
 from unittest.mock import MagicMock, patch
-from utils.document_processing import chunk_text, get_file_hash, read_txt, read_pdf, read_md
+
+from utils.document_processing import (
+    chunk_text,
+    get_file_hash,
+    read_md,
+    read_pdf,
+    read_txt,
+)
+
 
 def test_chunk_text():
     text = "This is a test sentence that should be chunked into pieces."
