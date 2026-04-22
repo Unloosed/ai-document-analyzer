@@ -21,6 +21,57 @@ A Streamlit-based RAG (Retrieval-Augmented Generation) assistant that answers qu
 - **Feedback Loop**: Log user feedback (thumbs up/down) for answer quality tracking.
 - **Admin Dashboard**: Real-time statistics on indexed documents and chunks.
 
+## Software Architecture
+
+The project follows a modular design to separate concerns:
+
+- **Frontend (`app.py`)**: Streamlit-based user interface for document upload, indexing, and querying.
+- **RAG Logic (`rag.py`)**: Orchestrates the retrieval-augmented generation process, including prompt construction and LLM interaction.
+- **Vector Store (`store.py`)**: Manages document indexing and retrieval using ChromaDB. It includes a manifest system for deduplication.
+- **Embeddings (`embeddings.py`)**: Custom wrapper for generating text embeddings via OpenRouter/OpenAI.
+- **Feedback (`feedback.py`)**: Simple utility to log user feedback on generated answers.
+- **Configuration (`config.py`)**: Centralized environment variable management.
+- **Utilities (`utils/`)**: Low-level document processing (PDF/TXT/MD reading, chunking, hashing) and logging setup.
+
+## Deep Dive: RAG Implementation
+
+### What is RAG?
+Retrieval-Augmented Generation (RAG) is a technique that enhances Large Language Model (LLM) responses by retrieving relevant information from a specific dataset before generating an answer. This "grounds" the model in facts and reduces hallucinations.
+
+### How it works in this project
+
+1.  **Ingestion & Processing**:
+    - Files are uploaded via Streamlit.
+    - `utils.document_processing` extracts text based on file type.
+    - Content is hashed (`SHA-256`) to prevent re-indexing the same file.
+2.  **Chunking**:
+    - Text is split into smaller, overlapping segments (chunks). Overlap ensures context isn't lost at the boundaries of chunks.
+3.  **Embedding & Storage**:
+    - Each chunk is converted into a numerical vector (embedding) using `openai/text-embedding-3-small`.
+    - Vectors and metadata (source name, chunk index) are stored in **ChromaDB**.
+4.  **Retrieval**:
+    - When a user asks a question, the query is also embedded.
+    - ChromaDB performs a semantic search to find the top $k$ chunks most similar to the query vector (using cosine distance).
+5.  **Generation**:
+    - The retrieved chunks are formatted into a prompt as "Context".
+    - The LLM (e.g., `openrouter/free`) is instructed to answer the question using only the provided context.
+    - The system enforces bracketed citations (e.g., [1]) to link statements back to specific chunks.
+
+### Design Choice Justifications
+
+- **ChromaDB**: Chosen for being lightweight, open-source, and capable of running locally without complex infrastructure (PersistentClient). It supports metadata filtering and efficient vector search.
+- **OpenRouter**: Used as a gateway to access various LLMs (like OpenAI, Anthropic, or free models) through a unified API, providing flexibility and cost management.
+- **Manual Implementation (Vanilla Python)**: Instead of using high-level frameworks like LangChain or LlamaIndex, this project implements the RAG pipeline manually. This provides:
+    - **Transparency**: Clear visibility into how prompts are built and how retrieval works.
+    - **Minimal Dependencies**: Reduced "dependency bloat" and faster startup times.
+    - **Control**: Easier customization of the manifest-based deduplication and citation logic.
+
+### Alternatives Considered
+
+- **FAISS**: Extremely fast for vector search but lacks the built-in metadata management and persistence features that ChromaDB provides out-of-the-box.
+- **Pinecone**: A great managed vector database, but it requires an external service and API keys, which conflicts with the goal of a self-contained local-first analyzer.
+- **LangChain**: While powerful, LangChain's abstractions can often make debugging and fine-grained control more difficult. For a focused project like this, the direct implementation is more maintainable.
+
 ## Installation
 
 1. **Clone the repository**:
@@ -48,9 +99,9 @@ A Streamlit-based RAG (Retrieval-Augmented Generation) assistant that answers qu
 Create a `.env` file in the root directory with your credentials:
 
 ```text
-OPENAI_API_KEY=your_openai_api_key_here
-EMBEDDING_MODEL=text-embedding-3-small
-CHAT_MODEL=gpt-4o-mini
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+EMBEDDING_MODEL=openai/text-embedding-3-small
+CHAT_MODEL=openrouter/free
 ```
 
 ## Running the App
@@ -65,12 +116,24 @@ The app will be available at `http://localhost:8501`.
 
 ## Development
 
+### Project Structure
+
+- `utils/`: Core utility modules for file operations, document processing, and logging.
+- `tests/`: Test suite using `pytest`.
+- `source/`: `Sphinx` documentation source.
+- `.github/workflows/`: CI/CD pipeline definitions for GitHub Actions.
+- `pyproject.toml`: Project metadata, dependency management, and tool configurations.
+- `Makefile`: Common development tasks.
+- `.pre-commit-config.yaml`: Pre-commit hook configuration.
+- `.editorconfig`: Editor formatting configuration.
+- `.devcontainer/`: VS Code development container setup.
+
 ### Running Tests
 
-We use `pytest` for testing. To run all tests with coverage:
+We use `pytest` for testing. To run all tests:
 
 ```bash
-pytest
+PYTHONPATH=. pytest
 ```
 
 ### Linting and Formatting
@@ -116,8 +179,6 @@ pre-commit install
 
 # Run manually on all files
 pre-commit run --all-files
-# or
-make pre-commit
 ```
 
 ### Makefile
@@ -134,15 +195,3 @@ make test        # Run pytest
 make docs        # Build documentation
 make clean       # Remove build and cache artifacts
 ```
-
-## Project Structure
-
-- `utils/`: Core utility modules for file operations and logging.
-- `tests/`: Test suite using `pytest`.
-- `source/`: `Sphinx` documentation source.
-- `.github/workflows/`: CI/CD pipeline definitions for GitHub Actions.
-- `pyproject.toml`: Project metadata, dependency management, and tool configurations.
-- `Makefile`: Common development tasks.
-- `.pre-commit-config.yaml`: Pre-commit hook configuration.
-- `.editorconfig`: Editor formatting configuration.
-- `.devcontainer/`: VS Code development container setup.
