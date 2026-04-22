@@ -1,6 +1,8 @@
 import streamlit as st
 
-from rag import add_document, answer_question, get_stats, log_feedback
+from feedback import log_feedback
+from rag import answer_question
+from store import add_document, get_stats
 from utils.document_processing import (
     chunk_text,
     get_file_hash,
