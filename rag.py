@@ -10,32 +10,20 @@ from chromadb.api.types import EmbeddingFunction, Embeddings
 from openai import OpenAI
 
 from utils.file_ops import get_env_variable
+from utils.logger_setup import setup_universal_logging
+
+setup_universal_logging(default_level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
-try:
-    OPENROUTER_API_KEY = get_env_variable("OPENROUTER_API_KEY", required=True)
-    OPENROUTER_BASE_URL = get_env_variable(
-        "OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1"
-    )
-    EMBEDDING_MODEL = get_env_variable(
-        "EMBEDDING_MODEL", default="openai/text-embedding-3-small"
-    )
-    CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free")
-except Exception as e:
-    logger.warning("Environment variables not fully set: %s", e)
-    OPENROUTER_API_KEY = get_env_variable("OPENROUTER_API_KEY", default="missing")
-    OPENROUTER_BASE_URL = get_env_variable(
-        "OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1"
-    )
-    EMBEDDING_MODEL = get_env_variable(
-        "EMBEDDING_MODEL", default="openai/text-embedding-3-small"
-    )
-    CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free")
-
-logger.warning("OPENROUTER_BASE_URL=%s", OPENROUTER_BASE_URL)
-logger.warning("EMBEDDING_MODEL=%s", EMBEDDING_MODEL)
-logger.warning("CHAT_MODEL=%s", CHAT_MODEL)
+OPENROUTER_API_KEY = get_env_variable("OPENROUTER_API_KEY", required=True, redact=True)
+OPENROUTER_BASE_URL = get_env_variable(
+    "OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1", redact=False
+)
+EMBEDDING_MODEL = get_env_variable(
+    "EMBEDDING_MODEL", default="openai/text-embedding-3-small", redact=False
+)
+CHAT_MODEL = get_env_variable("CHAT_MODEL", default="openrouter/free", redact=False)
 
 client = OpenAI(
     api_key=OPENROUTER_API_KEY,
